@@ -16,6 +16,7 @@ dependencies:
     - mss
     - numpy
     - mouse
+    - pyparsing
     - keyboard
     - beautifultable
     - pytweening
@@ -29,7 +30,7 @@ dependencies:
     - psutil
     - cryptography
     - pillow
-    - discord.py
+    - discord.py==1.7.3
     - parse
     - dependencies/tesserocr-2.5.2-cp310-cp310-win_amd64.whl
     - typing_extensions
