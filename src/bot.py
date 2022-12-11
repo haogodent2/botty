@@ -283,9 +283,9 @@ class Bot:
                 Logger.error("Failed to detect if /nopickup command was applied or not")
 
         self._game_stats.log_exp()
-        
-        RAND_SLEEP_TIME = random.uniform(0,1)*Config().char['random_sleep_range']
-        Logger.debug(f'Sleeping for {RAND_SLEEP_TIME} seconds before starting')
+     
+        RAND_SLEEP_TIME = random.uniform(0,1)*Config().char["random_sleep_range"]
+        Logger.debug(f"Sleeping for {RAND_SLEEP_TIME} seconds before starting")
         time.sleep(RAND_SLEEP_TIME)
 
         self.trigger_or_stop("maintenance")
