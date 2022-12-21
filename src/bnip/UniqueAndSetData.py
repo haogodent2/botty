@@ -1427,7 +1427,8 @@ UniqueAndSetData = {
     "grandcharm": {
         "uniques": [
             [
-                "GHEEDSFORTUNE"
+                "GHEEDSFORTUNE",
+                "ANEVILFORCE"
             ]
         ]
     },
