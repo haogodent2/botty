@@ -90,6 +90,29 @@ class Paladin(IChar):
         # release stand still key
         keyboard.send(Config().char["stand_still"], do_press=False)
 
+    def _cast_skill_no_aura(self, skill_name: str, cast_pos_abs: tuple[float, float] = None, spray: int = 0, min_duration: float = 0):
+    #self._log_cast(skill_name, cast_pos_abs, spray, min_duration, aura)
+
+        # ensure character stands still
+        keyboard.send(Config().char["stand_still"], do_release=False)
+
+        # set right hand skill
+        self._select_skill(skill_name, mouse_click_type = "right")
+
+        wait(0.04)
+
+        # cast right hand skill
+        start = time.time()
+        if min_duration:
+            while (time.time() - start) <= min_duration:
+                self._click_cast(cast_pos_abs, spray, "right")
+        else:
+            self._click_cast(cast_pos_abs, spray, "right")
+
+        # release stand still key
+        keyboard.send(Config().char["stand_still"], do_press=False)
+
+
     def _charge_to(self, pos: tuple[float, float]):
         if self._skill_hotkeys["charge"]:
             Logger.debug(f"Charge to {pos}")
