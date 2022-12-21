@@ -17,7 +17,9 @@ def get_d2r_folder() -> str:
     d2_saved_games = Config().general["saved_games_folder"]
     if not d2_saved_games:
         # assign default value for en-us Windows users
-        d2_saved_games = f"C:\\Users\\{os.getlogin()}\\Saved Games\\Diablo II Resurrected"
+        #d2_saved_games = f"C:\\Users\\{os.getlogin()}\\Saved Games\\Diablo II Resurrected"
+        d2_saved_games = f"C:\\Users\\haogo\\Saved Games\\Diablo II Resurrected"
+
     if not os.path.exists(d2_saved_games):
         print(f"Your D2R Saved Games folder could not be found here: {d2_saved_games}, input the correct location:")
         d2_saved_games = input()
