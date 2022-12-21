@@ -102,14 +102,14 @@ def close_down_d2():
         remote_grabber.close_window()
         restore_d2r_window_visibility()
     else:
-        #if d2r_hwnd:
-        window_list = []
-        EnumWindows(lambda w, l: l.append(w), window_list)
-        for hwnd in window_list:
-            _, process_id = GetWindowThreadProcessId(hwnd)
-            if "D2R.exe" in psutil.Process(process_id).name():
-                d2r_hwnd = hwnd
-                break
+        if not d2r_hwnd:
+            window_list = []
+            EnumWindows(lambda w, l: l.append(w), window_list)
+            for hwnd in window_list:
+                _, process_id = GetWindowThreadProcessId(hwnd)
+                if "D2R.exe" in psutil.Process(process_id).name():
+                    d2r_hwnd = hwnd
+                    break
         Logger.info(f"Sending WM_CLOSE to HWND {hwnd}...")
         PostMessage(hwnd, WM_CLOSE, 0, 0)
 
