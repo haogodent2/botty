@@ -23,12 +23,19 @@ class FoHdin(Paladin):
         self._pather.adapt_path((Location.A3_TRAV_START, Location.A3_TRAV_CENTER_STAIRS), [220, 221, 222, 903, 904, 905, 906])
 
 
-    def _cast_foh(self, cast_pos_abs: tuple[float, float], spray: int = 10, min_duration: float = 0, aura: str = "conviction"):
+    def _cast_foh(self, cast_pos_abs: tuple[float, float], spray: int = 10, min_duration: float = 0, aura: str = "redemption"):
         return self._cast_skill_with_aura(skill_name = "foh", cast_pos_abs = cast_pos_abs, spray = spray, min_duration = min_duration, aura = aura)
 
-    def _cast_holy_bolt(self, cast_pos_abs: tuple[float, float], spray: int = 10, min_duration: float = 0, aura: str = "concentration"):
+    def _cast_holy_bolt(self, cast_pos_abs: tuple[float, float], spray: int = 10, min_duration: float = 0, aura: str = "redemption"):
         #if skill is bound : concentration, use concentration, otherwise move on with conviction. alternatively use redemption whilst holybolting. conviction does not help holy bolt (its magic damage)
         return self._cast_skill_with_aura(skill_name = "holy_bolt", cast_pos_abs = cast_pos_abs, spray = spray, min_duration = min_duration, aura = aura)
+   
+    def _cast_foh_right(self, cast_pos_abs: tuple[float, float], spray: int = 10, min_duration: float = 0, aura: str = "redemption"):
+        return self._cast_skill_no_aura(skill_name = "foh", cast_pos_abs = cast_pos_abs, spray = spray, min_duration = min_duration)
+
+    def _cast_holy_bolt_right(self, cast_pos_abs: tuple[float, float], spray: int = 10, min_duration: float = 0, aura: str = "redemption"):
+        #if skill is bound : concentration, use concentration, otherwise move on with conviction. alternatively use redemption whilst holybolting. conviction does not help holy bolt (its magic damage)
+        return self._cast_skill_no_aura(skill_name = "holy_bolt", cast_pos_abs = cast_pos_abs, spray = spray, min_duration = min_duration)
 
     def _cast_hammers(self, min_duration: float = 0, aura: str = "concentration"): #for nihlathak
         return self._cast_skill_with_aura(skill_name = "blessed_hammer", spray = 0, min_duration = min_duration, aura = aura)
@@ -44,15 +51,17 @@ class FoHdin(Paladin):
         default_target_abs: tuple[int, int] = (0, 0),
         min_duration: float = 0,
         max_duration: float = 15,
-        foh_to_holy_bolt_ratio: int = 3,
+        foh_to_holy_bolt_ratio: int = 1,
         target_detect: bool = True,
         default_spray: int = 50,
         aura: str = ""
     ) -> bool:
         start = time.time()
         target_check_count = 1
-        foh_aura = aura if aura else "conviction"
-        holy_bolt_aura = aura if aura else "concentration"
+        #foh_aura = aura if aura else "conviction"
+        #holy_bolt_aura = aura if aura else "concentration"
+        foh_aura = aura if aura else "redemption"
+        holy_bolt_aura = aura if aura else "redemption"
         while (elapsed := (time.time() - start)) <= max_duration:
             cast_pos_abs = default_target_abs
             spray = default_spray
@@ -74,6 +83,44 @@ class FoHdin(Paladin):
                 else:
                     self._cast_foh(cast_pos_abs, spray=spray, aura=foh_aura)
 
+            target_check_count += 1
+        return True
+
+    def _right_foh_attack_sequence(
+        self,
+        default_target_abs: tuple[int, int] = (0, 0),
+        min_duration: float = 0,
+        max_duration: float = 15,
+        foh_to_holy_bolt_ratio: int = 1,
+        target_detect: bool = True,
+        default_spray: int = 50,
+    ) -> bool:
+        start = time.time()
+        target_check_count = 1
+        #foh_aura = aura if aura else "conviction"
+        #holy_bolt_aura = aura if aura else "concentration"
+
+        while (elapsed := (time.time() - start)) <= max_duration:
+            cast_pos_abs = default_target_abs
+            spray = default_spray
+            # if targets are detected, switch to targeting with reduced spread rather than present default cast position and default spread
+            if target_detect and (targets := get_visible_targets()):
+                # log_targets(targets)
+                spray = 5
+                cast_pos_abs = targets[0].center_abs
+
+            # if time > minimum and either targets aren't set or targets don't exist, exit loop
+            if elapsed > min_duration and (not target_detect or not targets):
+                break
+            else:
+
+                # TODO: add delay between FOH casts--doesn't properly cast each FOH in sequence
+                # cast foh to holy bolt with preset ratio (e.g. 3 foh followed by 1 holy bolt if foh_to_holy_bolt_ratio = 3)
+                if foh_to_holy_bolt_ratio > 0 and not target_check_count % (foh_to_holy_bolt_ratio + 1):
+                    self._cast_holy_bolt_right(cast_pos_abs, spray=spray)
+                else:
+                    self._cast_foh_right(cast_pos_abs, spray=spray)
+            wait(0.1)
             target_check_count += 1
         return True
 
@@ -119,7 +166,7 @@ class FoHdin(Paladin):
             self._pather.traverse_nodes_automap([1103], self, timeout=1.0, do_pre_move=False)
 
         cast_pos_abs = [pindle_pos_abs[0] * 0.9, pindle_pos_abs[1] * 0.9]
-        self._generic_foh_attack_sequence(default_target_abs=cast_pos_abs, min_duration=atk_len_dur, max_duration=atk_len_dur*3, default_spray=11)
+        self._right_foh_attack_sequence(default_target_abs=cast_pos_abs, min_duration=atk_len_dur, max_duration=atk_len_dur*3, default_spray=11)
 
         if self.capabilities.can_teleport_natively:
             self._pather.traverse_nodes_fixed("pindle_end", self)
@@ -129,7 +176,7 @@ class FoHdin(Paladin):
             self._pather.traverse_nodes_automap((Location.A5_PINDLE_SAFE_DIST, Location.A5_PINDLE_END), self, timeout=1.0, do_pre_move=False)
 
         # Use target-based attack sequence one more time before pickit
-        self._generic_foh_attack_sequence(default_target_abs=cast_pos_abs, max_duration=atk_len_dur, default_spray=11)
+        self._right_foh_attack_sequence(default_target_abs=cast_pos_abs, max_duration=atk_len_dur, default_spray=11)
         self._activate_cleanse_redemption()
 
         return True
@@ -165,17 +212,22 @@ class FoHdin(Paladin):
             if not self._pather.traverse_nodes_automap([1121], self, timeout=1.0, do_pre_move=False, force_move=True, force_tp=False, use_tp_charge=False):
                 return False
 
-        self._generic_foh_attack_sequence(default_target_abs=eld_pos_abs, min_duration=atk_len_dur, max_duration=atk_len_dur*3, default_spray=70)
+        self._charge_to(convert_screen_to_abs((675, 150)))
+        wait(0.05, 0.1)
+        self._cast_hammers(Config().char["atk_len_eldritch"])
+        wait(0.1, 0.15)
+        self._cast_hammers(1.6, "redemption")
+        #self._generic_foh_attack_sequence(default_target_abs=eld_pos_abs, min_duration=atk_len_dur, max_duration=atk_len_dur*3, default_spray=70)
 
         # move to end node
-        pos_m = convert_abs_to_monitor((70, -200))
-        self.pre_move()
-        self.move(pos_m, force_move=True)
-        self._pather.traverse_nodes_automap((Location.A5_ELDRITCH_SAFE_DIST, Location.A5_ELDRITCH_END), self, timeout=0.1)
+       # pos_m = convert_abs_to_monitor((70, -200))
+        #self.pre_move()
+       # self.move(pos_m, force_move=True)
+       # self._pather.traverse_nodes_automap((Location.A5_ELDRITCH_SAFE_DIST, Location.A5_ELDRITCH_END), self, timeout=0.1)
 
         # check mobs one more time before pickit
-        self._generic_foh_attack_sequence(default_target_abs=eld_pos_abs, max_duration=atk_len_dur, default_spray=70)
-        self._activate_cleanse_redemption()
+       # self._generic_foh_attack_sequence(default_target_abs=eld_pos_abs, max_duration=atk_len_dur, default_spray=70)
+       # self._activate_cleanse_redemption()
 
         return True
 
