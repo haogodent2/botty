@@ -35,14 +35,6 @@ class BlizzSorc(Sorceress):
         self._pather.offset_node(501, (10, -33))
         self._secondary_skill = self._static_field
         self._ranged_secondary = False
-        if self._skill_hotkeys["hydra"]:
-            self._secondary_skill = self._hydra
-            self._ranged_secondary = True
-        elif self._skill_hotkeys["fire_ball"]:
-            self._secondary_skill = self._fire_ball
-            self._ranged_secondary = True
-        elif self._skill_hotkeys["nova"]:
-            self._secondary_skill = self._nova
 
     def _hydra(self, cast_pos_abs: tuple[float, float], wait_time = 3.5):
         self.cast_in_arc("hydra", cast_pos_abs, time_in_s=self._cast_duration*5, spread_deg=12)
@@ -278,7 +270,7 @@ class BlizzSorc(Sorceress):
             self._cast_ranged_spell("glacier_spike", pindle_pos_abs)
         else:
             self._cast_ranged_spell("glacier_spike", cast_pos_abs, monster="pindle")
-        self.cast_in_arc(ability="ice_blast", cast_pos_abs=pindle_pos_abs, spread_deg=10, time_in_s=4*self._cast_duration, btn="left")
+        #self.cast_in_arc(ability="ice_blast", cast_pos_abs=pindle_pos_abs, spread_deg=10, time_in_s=4*self._cast_duration, btn="left")
         for i in range(int(atk_len - 1)):
             cast_pos_abs = (pindle_pos_abs[0] * 0.75**(i+1), pindle_pos_abs[1] * 0.75**(i+1))
             self._blizzard(cast_pos_abs, spray=5)
@@ -300,7 +292,7 @@ class BlizzSorc(Sorceress):
             if not found_name_bar:
                 found_name_bar = self.find_name_bar(grab(), "pindle")
             self._cast_ranged_spell("glacier_spike", cast_pos_abs, monster="pindle")
-            self.cast_in_arc(ability="ice_blast", cast_pos_abs=pindle_pos_abs, spread_deg=15, time_in_s=4*self._cast_duration, btn="left")
+            #self.cast_in_arc(ability="ice_blast", cast_pos_abs=pindle_pos_abs, spread_deg=15, time_in_s=4*self._cast_duration, btn="left")
             if self._monster_hp < 0.1:
                 break
 
