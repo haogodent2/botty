@@ -79,19 +79,19 @@ def set_d2r_always_on_top():
     else:
         print('OS not supported, unable to set D2R always on top')
 
-def get_d2r_hwnd():
-    windows_list = []
-    EnumWindows(lambda w, l: l.append((w, GetWindowText(w))), windows_list)
-    for w in windows_list:
-        if w[1] == "Diablo II: Resurrected":
-            return w[1]
-        else:
-            return
-
-
 def restore_d2r_window_visibility():
     if os.name == 'nt':
-        hwnd = get_d2r_hwnd()
+        if d2r_hwnd is None:
+            windows_list = []
+            EnumWindows(lambda w, l: l.append((w, GetWindowText(w))), windows_list)
+            for w in windows_list:
+                if w[1] == "Diablo II: Resurrected":
+                    hwnd = w[1]
+                    break
+            else:
+                return
+        else:
+            hwnd = d2r_hwnd
         SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)
         print("Restored D2R window visibility")
     else:
