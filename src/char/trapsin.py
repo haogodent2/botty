@@ -50,6 +50,18 @@ class Trapsin(IChar):
             mouse.release(button="left")
         keyboard.send(Config().char["stand_still"], do_press=False)
 
+    def _mind_blast(self, cast_pos_abs: tuple[float, float], spray: float = 10):
+        keyboard.send(Config().char["stand_still"], do_release=False)
+        keyboard.send(self._skill_hotkeys["mind_blast"])
+        for _ in range(2):
+            x = cast_pos_abs[0] + (random.random() * 2*spray - spray)
+            y = cast_pos_abs[1] + (random.random() * 2*spray - spray)
+            cast_pos_monitor = convert_abs_to_monitor((x, y))
+            mouse.move(*cast_pos_monitor)
+            mouse.press(button="right")
+            wait(0.2, 0.3)
+            mouse.press(button="right")
+        keyboard.send(Config().char["stand_still"], do_press=False)
 
     def _right_attack(self, cast_pos_abs: tuple[float, float], spray: float = 10):
         keyboard.send(self._skill_hotkeys["lightning_sentry"])
@@ -87,6 +99,7 @@ class Trapsin(IChar):
         eld_pos_abs = convert_screen_to_abs(Config().path["eldritch_end"][0])
         cast_pos_abs = [eld_pos_abs[0] * 0.9, eld_pos_abs[1] * 0.9]
         for _ in range(atk_len):
+            self._mind_blast(cast_pos_abs, 90)
             self._right_attack(cast_pos_abs, 90)
             self._left_attack(cast_pos_abs, 90)
         # Move to items
@@ -104,6 +117,7 @@ class Trapsin(IChar):
             shenk_pos_abs = convert_screen_to_abs(Config().path["shenk_end"][0])
         cast_pos_abs = [shenk_pos_abs[0] * 0.9, shenk_pos_abs[1] * 0.9]
         for _ in range(atk_len):
+            self._mind_blast(cast_pos_abs, 90)
             self._right_attack(cast_pos_abs, 90)
             self._left_attack(cast_pos_abs, 90)
         # Move to items
