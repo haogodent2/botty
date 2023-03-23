@@ -66,7 +66,6 @@ class Paladin(IChar):
         mouse.release(button = mouse_click_type)
 
     def _cast_skill_with_aura(self, skill_name: str, cast_pos_abs: tuple[float, float] = None, spray: int = 0, min_duration: float = 0, aura: str = ""):
-        #self._log_cast(skill_name, cast_pos_abs, spray, min_duration, aura)
 
         # set aura if needed
         if aura:
@@ -74,10 +73,6 @@ class Paladin(IChar):
 
         # ensure character stands still
         keyboard.send(Config().char["stand_still"], do_release=False)
-
-        # set left hand skill
-        self._select_skill(skill_name, mouse_click_type = "left")
-        wait(0.04)
 
         # cast left hand skill
         start = time.time()

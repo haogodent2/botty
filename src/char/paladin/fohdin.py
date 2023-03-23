@@ -205,7 +205,6 @@ class FoHdin(Paladin):
 
     def kill_eldritch(self) -> bool:
         eld_pos_abs = convert_screen_to_abs(Config().path["eldritch_end"][0])
-        atk_len_dur = float(Config().char["atk_len_eldritch"])
 
         if (self.capabilities.can_teleport_natively or self.capabilities.can_teleport_with_charges) and self._use_safer_routines:
             Logger.debug("Slightly retreating, so the Merc gets hit. Looks strange, but is intended!") #I would leave this message in, so users dont complain that there is a strange movement pattern.
@@ -216,7 +215,7 @@ class FoHdin(Paladin):
         wait(0.05, 0.1)
         self._cast_hammers(Config().char["atk_len_eldritch"])
         wait(0.1, 0.15)
-        self._cast_hammers(1.6, "redemption")
+        self._activate_cleanse_redemption()
         #self._generic_foh_attack_sequence(default_target_abs=eld_pos_abs, min_duration=atk_len_dur, max_duration=atk_len_dur*3, default_spray=70)
 
         # move to end node
@@ -252,10 +251,14 @@ class FoHdin(Paladin):
         wait(0.05, 0.1)
 
         # bypass mob detect first
-        self._cast_foh((0, 0), spray=11, min_duration = 2, aura = "conviction")
+        #self._cast_foh((0, 0), spray=11, min_duration = 2, aura = "conviction")
+        self._cast_hammers(min_duration = 4)
+        wait(0.15)
         # then do generic mob detect sequence
         diff = atk_len_dur if atk_len_dur <= 2 else (atk_len_dur - 2)
-        self._generic_foh_attack_sequence(min_duration=atk_len_dur - diff, max_duration=atk_len_dur*3 - diff, default_spray=10, target_detect=False)
+        self._cast_hammers(atk_len_dur)
+        wait(0.15)
+        #self._generic_foh_attack_sequence(min_duration=atk_len_dur - diff, max_duration=atk_len_dur*3 - diff, default_spray=10, target_detect=False)
         self._activate_cleanse_redemption()
 
         return True
