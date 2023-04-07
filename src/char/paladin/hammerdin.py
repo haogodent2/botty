@@ -26,6 +26,9 @@ class Hammerdin(Paladin):
         self._pather.offset_node(1149, (70, 10)) # not sure this node has to be offset for automap, keeping it to be safe
         self._pather.offset_node(122, (-50, 150))
         self._pather.offset_node(1188, (-100, 100))
+        #move hammerdin closer to eldrich before hammers, move left 10 px, move up 10px
+        self._pather.offset_node(1122, (-10, -10))
+
         #custom color filter for travincil
         self._trav_filters = [
             {"erode": 1, "blur": 3, "lh": 0, "ls": 0, "lv": 200, "uh": 0, "us": 255, "uv": 255}, # council's red lightning
