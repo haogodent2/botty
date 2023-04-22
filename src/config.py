@@ -200,6 +200,7 @@ class Config:
             "atk_len_arc": float(self._select_val("char", "atk_len_arc")),
             "atk_len_trav": float(self._select_val("char", "atk_len_trav")),
             "atk_len_pindle": float(self._select_val("char", "atk_len_pindle")),
+            "necro_wait": float(self._select_val("char", "necro_wait")),
             "atk_len_eldritch": float(self._select_val("char", "atk_len_eldritch")),
             "atk_len_shenk": float(self._select_val("char", "atk_len_shenk")),
             "atk_len_nihlathak": float(self._select_val("char", "atk_len_nihlathak")),

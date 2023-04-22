@@ -351,7 +351,8 @@ class Necro(IChar):
             target = unit_vector(rotate_vec(cast_dir, angle))
             #Logger.info("current angle ~> "+str(angle))
             for j in range(cast_v_div):
-                circle_pos_abs = get_closest_non_hud_pixel(pos = (target*120.0*float(j+1.0))*offset, pos_type="abs")
+                pos = (target*120.0*float(j+1.0))*offset
+                circle_pos_abs = get_closest_non_hud_pixel(tuple(pos))
                 circle_pos_monitor = convert_abs_to_monitor(circle_pos_abs)
                 mouse.move(*circle_pos_monitor,delay_factor=[0.3*delay, .6*delay])
 
@@ -369,16 +370,12 @@ class Necro(IChar):
         pc = [pindle_pos_abs[0] * 0.9, (pindle_pos_abs[1]-50) * 0.9]
 
 
-        raise_skel_pos = [0,10]
-        rot_deg=0
+ 
         self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=32,cast_v_div=2,cast_spell='raise_skeleton',offset=2,delay=1.6)
         wait(self._cast_duration, self._cast_duration +.2)
-        self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=4,cast_v_div=3,cast_spell='amp_dmg',delay=3.0)
+        self._bone_armor()
+        wait(self._cast_duration, self._cast_duration +.1)
 
-        rot_deg=0
-
-
-        rot_deg=-180
 
         #enable this if your merc is dying
         pindle_pack_kill = bool(int(self._skill_hotkeys["clear_pindle_pack"]))
@@ -387,9 +384,14 @@ class Necro(IChar):
             Logger.info("optional pindle pack")
             self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=12,cast_v_div=2,cast_spell='corpse_explosion',delay=3.0,offset=1.8)
             wait(self._cast_duration, self._cast_duration +.2)
+            self.bone_armor()
+            wait(self._cast_duration, self._cast_duration +.2)
             self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=12,cast_v_div=2,cast_spell='corpse_explosion',delay=3.0,offset=1.8)
-            wait(self._cast_duration, self._cast_duration +.1)
-            self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=12,cast_v_div=2,cast_spell='raise_revive',delay=1.2,offset=1.8)
+            wait(self._cast_duration, self._cast_duration +.3)
+            self.bone_armor()
+            wait(self._cast_duration, self._cast_duration +.2)
+
+            #self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=12,cast_v_div=2,cast_spell='raise_revive',delay=1.2,offset=1.8)
 
         #move to pindle combat position
 
@@ -398,14 +400,13 @@ class Necro(IChar):
         wait(self._cast_duration, self._cast_duration +.2)
 
         # wiggle to unstick merc....
-        pos_m = convert_abs_to_monitor((0, -150))
+        pos_m = convert_abs_to_monitor((0, -25))
         self.pre_move()
         self.move(pos_m, force_move=True)
         wait(self._cast_duration, self._cast_duration +.1)
-        self._bone_armor()
 
         # wiggle to unstick merc....
-        pos_m = convert_abs_to_monitor((0, 150))
+        pos_m = convert_abs_to_monitor((0, 20))
         self.pre_move()
         self.move(pos_m, force_move=True)
         wait(self._cast_duration, self._cast_duration +.1)
@@ -418,33 +419,36 @@ class Necro(IChar):
 
         for _ in range(atk_len):
             Logger.info("pindle atk cycle")
+            wait(self._cast_duration, self._cast_duration +.2)
             self._amp_dmg(cast_pos_abs, 11)
-            self._left_attack_single(cast_pos_abs, 11, cast_count=8)
-            rot_deg=0
-
-
-            for _ in range(2):
-                corpse_pos = unit_vector(rotate_vec(cast_pos_abs, rot_deg)) * 200
+            wait(self._cast_duration, self._cast_duration +.2)
+            self._bone_armor()
+            wait(self._cast_duration, self._cast_duration +.2)
+            self._clay_golem()
+            #self._left_attack_single(cast_pos_abs, 11, cast_count=8)
+            #wait(Config().char["necro_wait"],Config().char["necro_wait"]) #let minions do their thing
+            
+            now = time.time()
+            attack_end = now+float(Config().char["necro_wait"])
+            while time.time() < attack_end:
+                self._amp_dmg(cast_pos_abs, 11)
+                wait(self._cast_duration, self._cast_duration +.2)
                 self._corpse_explosion(pc,40,cast_count=2)
-                rot_deg-=7
-            rot_deg=0
-            for _ in range(2):
-                corpse_pos = unit_vector(rotate_vec(cast_pos_abs, rot_deg)) * 200
-                self._corpse_explosion(pc,40,cast_count=2)
-                rot_deg+=7
+                wait(self._cast_duration, self._cast_duration +.2)
+                self._bone_armor()
 
             # wiggle to unstick merc
-            pos_m = convert_abs_to_monitor((0, -150))
+            pos_m = convert_abs_to_monitor((0, -15))
             self.pre_move()
             self.move(pos_m, force_move=True)
             wait(self._cast_duration, self._cast_duration +.1)
-            pos_m = convert_abs_to_monitor((0, 150))
+            pos_m = convert_abs_to_monitor((0, 15))
             self.pre_move()
             self.move(pos_m, force_move=True)
             wait(self._cast_duration, self._cast_duration +.1)
 
         self._summon_count()
-        self._revive(cast_pos_abs,50,cast_count=4)
+        #self._revive(cast_pos_abs,50,cast_count=4)
         self._summon_stat()
 
         Logger.info("atk cycle end")
@@ -476,8 +480,23 @@ class Necro(IChar):
         for _ in range(atk_len):
             #Logger.info("atk cycle")
             Logger.info("eldrich atk cycle")
-            self._left_attack_single(cast_pos_abs, 11, cast_count=8)
-            self._corpse_explosion(cast_pos_abs, 60, cast_count=4)
+            self._clay_golem()
+            wait(self._cast_duration, self._cast_duration +.2)
+            self._amp_dmg(cast_pos_abs, 11)
+            wait(self._cast_duration, self._cast_duration +.2)
+            self.bone_armor()
+            #wait(Config().char["necro_wait"],Config().char["necro_wait"])
+            #self._left_attack_single(cast_pos_abs, 11, cast_count=8)
+            #self._corpse_explosion(cast_pos_abs, 60, cast_count=4)
+            now = time.time()
+            attack_end = now+float(Config().char["necro_wait"])
+            while time.time() < attack_end:
+                self._amp_dmg(cast_pos_abs, 11)
+                wait(self._cast_duration, self._cast_duration +.2)
+                self._corpse_explosion(cast_pos_abs, 60, cast_count=4)
+                wait(self._cast_duration, self._cast_duration +.2)
+                self._bone_armor()
+
         Logger.info("atk cycle end")
 
         # Move to items
@@ -490,22 +509,18 @@ class Necro(IChar):
 
         #get some more summons out for elite packs
 
-        self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=12,cast_v_div=4,cast_spell='raise_revive',delay=1.2,offset=.8)
+        #self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=12,cast_v_div=4,cast_spell='raise_revive',delay=1.2,offset=.8)
         #self._summon_count()
         #self._raise_skeleton([0,-40],80,cast_count=4)
-        #self._raise_mage(cast_pos_abs,80,cast_count=10)
 
         for _ in range(10):
             self._summon_count()
             if self._skeletons_count < 10:
                 self._raise_skeleton([0,10],180,cast_count=2)
                 self._raise_skeleton([0,-10],180,cast_count=2)
-            #if self._mages_count < 5:
-            #    self._raise_mage([0,-40],80,cast_count=2)
-            #    self._raise_mage(cast_pos_abs,90,cast_count=2)
-            if self._revive_count < 10:
-                self._revive([0,10],180,cast_count=2)
-                self._revive([0,-10],180,cast_count=2)
+            #if self._revive_count < 10:
+            #    self._revive([0,10],180,cast_count=2)
+            #    self._revive([0,-10],180,cast_count=2)
         self._summon_stat()
         # move a bit back
         pos_m = convert_abs_to_monitor((0, -350))
@@ -537,22 +552,22 @@ class Necro(IChar):
         self._cast_circle(cast_dir=[-1,1],cast_start_angle=0,cast_end_angle=360,cast_div=4,cast_v_div=3,cast_spell='amp_dmg',delay=3.0)
         corpse_exp_pos = [200,80]
 
-        for _ in range(int(Config().char["atk_len_shenk"])):
+        atk_len = int(Config().char["atk_len_shenk"])
+        for _ in range(atk_len):
             Logger.info("shenk atk cycle")
             self._check_shenk_death()
             if(self._shenk_dead):
                 break
-            self._left_attack_single(cast_pos_abs, 11, cast_count=4)
-            self._bone_armor()
+            #self._left_attack_single(cast_pos_abs, 11, cast_count=4)
             self._amp_dmg(cast_pos_abs, 11)
+            self._bone_armor()
+            wait(Config().char["necro_wait"],Config().char["necro_wait"])
             self._corpse_explosion(corpse_exp_pos, 80, cast_count=12)
             self._summon_count()
             if self._skeletons_count < 10:
                 self._raise_skeleton(cast_pos_abs,160,cast_count=6)
-            #if self._mages_count < 5:
-            #    self._raise_mage(cast_pos_abs,160,cast_count=6)
-            if self._revive_count < 10:
-                self._revive(cast_pos_abs,160,cast_count=2)
+            #if self._revive_count < 10:
+            #    self._revive(cast_pos_abs,160,cast_count=2)
             self._check_shenk_death()
             if(self._shenk_dead):
                 break
@@ -561,14 +576,14 @@ class Necro(IChar):
         # Move to items
         #wait(self._cast_duration, self._cast_duration + 0.2)
         self._pather.traverse_nodes(([148,149]), self, timeout=3.4, force_tp=True)
-        for _ in range(30):
+        for _ in range(15):
             self._summon_count()
             if self._skeletons_count < 10:
                 self._raise_skeleton([-50,-90],160,cast_count=2)
             #if self._mages_count < 5:
             #    self._raise_mage([-50,-90],160,cast_count=2)
-            if self._revive_count < 10:
-                self._revive([-50,-90],160,cast_count=2)
+            #if self._revive_count < 10:
+            #    self._revive([-50,-90],160,cast_count=2)
         self._shenk_dead = 1
         self._summon_stat()
         return True
