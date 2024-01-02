@@ -102,6 +102,7 @@ def close_down_d2():
         remote_grabber.close_window()
         restore_d2r_window_visibility()
     else:
+        d2r_hwnd = None
         if not d2r_hwnd:
             window_list = []
             EnumWindows(lambda w, l: l.append(w), window_list)
