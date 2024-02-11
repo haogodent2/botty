@@ -8,7 +8,7 @@
 ```bash
 git clone https://github.com/bottytools/botty.git
 cd botty
-conda env create environment.yml
+conda env create environment.yml // conda env create --file=environment.yml
 conda activate botty
 python src/main.py
 ```
